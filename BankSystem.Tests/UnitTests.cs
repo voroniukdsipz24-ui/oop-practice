@@ -75,13 +75,23 @@ public class StrategyTests
     [Fact]
     public void TieredInterest_AppliesCorrectTier()
     {
+        // Tiers: balance >= 0    → 1%
+        //        balance >= 1000 → 3%
+        //        balance >= 10000 → 5%
         var strat = new TieredInterestStrategy(new[]
         {
             (0m, 0.01m),
             (1000m, 0.03m),
             (10000m, 0.05m)
         });
-        Assert.Equal(50m, strat.CalculateInterest(1000m));
+
+        // 500 → tier 1% → 500 × 0.01 = 5
+        Assert.Equal(5m, strat.CalculateInterest(500m));
+
+        // 1000 → tier 3% (≥ 1000) → 1000 × 0.03 = 30
+        Assert.Equal(30m, strat.CalculateInterest(1000m));
+
+        // 10000 → tier 5% (≥ 10000) → 10000 × 0.05 = 500
         Assert.Equal(500m, strat.CalculateInterest(10000m));
     }
 
