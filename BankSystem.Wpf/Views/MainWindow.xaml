@@ -1,0 +1,322 @@
+<Window x:Class="BankSystem.Wpf.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:BankSystem.Wpf.ViewModels"
+        Title="Емулятор банківської системи"
+        Height="780" Width="1280"
+        MinHeight="600" MinWidth="1100"
+        FontFamily="Segoe UI" FontSize="13"
+        Background="#F5F5F5">
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <!-- ===== KEY STYLE: visible disabled state ===== -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Padding" Value="14,8"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="MinWidth" Value="110"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <!-- ВАЖЛИВО: видимий disabled-стан -->
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Background" Value="#BDBDBD"/>
+                                <Setter Property="Foreground" Value="#757575"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ToolbarButton" TargetType="Button">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#E8E8E8"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Background" Value="#E0E0E0"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#BDBDBD"/>
+                                <Setter Property="Foreground" Value="#9E9E9E"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="6,5"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="MinHeight" Value="28"/>
+            <Setter Property="BorderBrush" Value="#BBBBBB"/>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="MinHeight" Value="28"/>
+        </Style>
+
+        <Style TargetType="GroupBox">
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#DDDDDD"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style TargetType="Label">
+            <Setter Property="Padding" Value="0,4,0,2"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Foreground" Value="#555555"/>
+        </Style>
+
+        <Style TargetType="DataGrid">
+            <Setter Property="BorderBrush" Value="#DDDDDD"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#EEEEEE"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#FAFAFA"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===== TOOLBAR ===== -->
+        <Border Grid.Row="0" Background="White" BorderBrush="#DDDDDD" BorderThickness="0,0,0,1" Padding="10,6">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="↶ Скасувати" Style="{StaticResource ToolbarButton}" Command="{Binding UndoCommand}"/>
+                <Button Content="↷ Повторити" Style="{StaticResource ToolbarButton}" Command="{Binding RedoCommand}"/>
+                <Separator Margin="8,0" Background="#DDDDDD"/>
+                <Button Content="💾 Зберегти JSON…" Style="{StaticResource ToolbarButton}" Command="{Binding SaveJsonCommand}"/>
+                <Button Content="💾 Зберегти XML…" Style="{StaticResource ToolbarButton}" Command="{Binding SaveXmlCommand}"/>
+                <Button Content="📂 Завантажити…" Style="{StaticResource ToolbarButton}" Command="{Binding LoadJsonCommand}"/>
+                <Separator Margin="8,0" Background="#DDDDDD"/>
+                <TextBlock VerticalAlignment="Center" Margin="10,0" FontWeight="Normal">
+                    <Run Text="Загальний баланс:" Foreground="#555555"/>
+                    <Run Text="{Binding TotalBalance, StringFormat=C, Mode=OneWay}" FontWeight="Bold" Foreground="#107C10"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="340"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="320"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ===== LEFT: Open new account ===== -->
+            <GroupBox Grid.Column="0" Header="📝 Відкрити новий рахунок">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Label Content="Ім'я власника:"/>
+                        <TextBox Text="{Binding NewOwner, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <Label Content="Тип рахунку:"/>
+                        <ComboBox ItemsSource="{Binding AccountTypes}"
+                                  SelectedItem="{Binding SelectedAccountType}"/>
+
+                        <Label Content="Початковий баланс:"/>
+                        <TextBox Text="{Binding NewInitialBalance}"/>
+
+                        <Label Content="Ліміт овердрафту (для Поточного):"/>
+                        <TextBox Text="{Binding NewOverdraft}"/>
+
+                        <Label Content="Процентна ставка (для Ощадного, 0–1):"/>
+                        <TextBox Text="{Binding InterestRate}"/>
+
+                        <Button Content="➕ Відкрити рахунок"
+                                Style="{StaticResource ActionButton}"
+                                Background="#0078D4"
+                                Margin="0,15,0,5"
+                                Height="38"
+                                Command="{Binding OpenAccountCommand}"/>
+
+                        <Border BorderBrush="#EEEEEE" BorderThickness="0,1,0,0" Margin="0,15,0,0" Padding="0,10,0,0">
+                            <TextBlock TextWrapping="Wrap" FontStyle="Italic" FontWeight="Normal" Foreground="#888888" FontSize="11">
+                                Реалізовані патерни:
+                                <LineBreak/>• Factory — створення рахунків
+                                <LineBreak/>• Strategy — алгоритми відсотків
+                                <LineBreak/>• Command — операції з Undo/Redo
+                                <LineBreak/>• Observer — живі сповіщення
+                            </TextBlock>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </GroupBox>
+
+            <!-- ===== CENTER: Accounts + Operations + History ===== -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Accounts list -->
+                <GroupBox Grid.Row="0" Header="💼 Рахунки (оберіть рядок для роботи)">
+                    <DataGrid ItemsSource="{Binding Accounts}"
+                              SelectedItem="{Binding SelectedAccount}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              IsReadOnly="True"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Власник" Binding="{Binding Owner}" Width="*"/>
+                            <DataGridTextColumn Header="Тип" Width="180">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="." Converter="{StaticResource TypeNameConverter}"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Баланс" Width="120"
+                                                Binding="{Binding Balance, StringFormat=C}"/>
+                            <DataGridTextColumn Header="Відкрито" Width="140"
+                                                Binding="{Binding CreatedAt, StringFormat=g}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+
+                <!-- Operations panel - REDESIGNED with proper sizes -->
+                <GroupBox Grid.Row="1" Header="💸 Операції з обраним рахунком">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Row 1: input fields with proper widths -->
+                        <Grid Grid.Row="0" Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="160"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.Column="0" Content="Сума:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding TransactionAmount}"
+                                     VerticalAlignment="Center"
+                                     FontSize="14"
+                                     Padding="8,6"/>
+
+                            <Label Grid.Column="3" Content="Переказати на:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <ComboBox Grid.Column="4"
+                                      ItemsSource="{Binding Accounts}"
+                                      SelectedItem="{Binding TransferTargetAccount}"
+                                      DisplayMemberPath="Owner"
+                                      VerticalAlignment="Center"
+                                      FontSize="14"
+                                      Padding="8,6"/>
+                        </Grid>
+
+                        <!-- Row 2: action buttons -->
+                        <StackPanel Grid.Row="1" Orientation="Horizontal">
+                            <Button Content="⬇ Поповнити"
+                                    Style="{StaticResource ActionButton}"
+                                    Background="#107C10"
+                                    Command="{Binding DepositCommand}"/>
+                            <Button Content="⬆ Зняти"
+                                    Style="{StaticResource ActionButton}"
+                                    Background="#D83B01"
+                                    Command="{Binding WithdrawCommand}"/>
+                            <Button Content="↔ Переказати"
+                                    Style="{StaticResource ActionButton}"
+                                    Background="#5C2D91"
+                                    Command="{Binding TransferCommand}"/>
+                            <Button Content="% Нарахувати відсотки"
+                                    Style="{StaticResource ActionButton}"
+                                    Background="#0078D4"
+                                    MinWidth="170"
+                                    Command="{Binding ApplyInterestCommand}"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Transaction history -->
+                <GroupBox Grid.Row="2" Header="📜 Історія транзакцій (обраного рахунку)">
+                    <DataGrid ItemsSource="{Binding SelectedTransactions}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Час" Width="160"
+                                                Binding="{Binding Timestamp, StringFormat=g}"/>
+                            <DataGridTextColumn Header="Тип" Width="140"
+                                                Binding="{Binding Type}"/>
+                            <DataGridTextColumn Header="Сума" Width="*"
+                                                Binding="{Binding Amount, StringFormat=C}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </GroupBox>
+            </Grid>
+
+            <!-- ===== RIGHT: Live notifications ===== -->
+            <GroupBox Grid.Column="2" Header="🔔 Живі сповіщення (Observer)">
+                <ListBox ItemsSource="{Binding Notifications}"
+                         FontFamily="Consolas" FontSize="11"
+                         BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="6,3"/>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </GroupBox>
+        </Grid>
+
+        <!-- ===== STATUS BAR ===== -->
+        <Border Grid.Row="2" Background="#F0F0F0" BorderBrush="#DDDDDD" BorderThickness="0,1,0,0" Padding="10,5">
+            <TextBlock Text="{Binding StatusMessage}" Foreground="#555555"/>
+        </Border>
+    </Grid>
+</Window>

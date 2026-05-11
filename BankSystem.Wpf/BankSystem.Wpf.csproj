@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>BankSystem.Wpf</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BankSystem.Domain\BankSystem.Domain.csproj" />
+    <ProjectReference Include="..\BankSystem.Application\BankSystem.Application.csproj" />
+    <ProjectReference Include="..\BankSystem.Infrastructure\BankSystem.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

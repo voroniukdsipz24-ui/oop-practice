@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.cache
+.idea/
+*.swp
+TestResults/
+*.log
+bank-state.json
